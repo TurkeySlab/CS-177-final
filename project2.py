@@ -301,7 +301,7 @@ def newGameWindow():
     drt.setOutline('#00a202')
    
     # Draws the stuff ( like the method says )
-    sky.draw(w)
+    Image(Point(300,225),'background.png').draw(w)
     drt.draw(w)
     
     return w
@@ -309,11 +309,21 @@ def newGame(w, pwr, ang, grvy, points, rnd):
     # creates the disk and holds all game related things
     dskL = Circle(Point(590, int(randint(350, 450))), 8)
     dskR = Circle(Point(10, int(randint(350, 450))), 8)
+    rabL = Circle(Point(590, 450), 8)
+    rabR = Circle(Point(10 , 450), 8)
     dskL.setFill('dark grey')
     dskR.setFill('dark grey')
+    rabL.setFill('dark grey')
+    rabR.setFill('dark grey')
     
-    dskL.draw(w)
-    dskR.draw(w)
+    rand = randint(1, 10)
+    
+    if rand >= 5:
+        dskL.draw(w)
+        dskR.draw(w)
+    else:
+        rabL.draw(w)
+        rabR.draw(w)
     
     # special conditionals for when the disks are done 
     L, R = 0, 0
