@@ -11,7 +11,9 @@ from math     import*
 from random   import randint
 from time     import sleep, time
 
-
+'''
+This is some text that max wrote
+'''
 class Button:
     # This class creates button objects to be used on the GUI panel
     def __init__(self, center, width, height, label, colour):
