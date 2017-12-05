@@ -163,9 +163,15 @@ __version__ = "5.0"
 import time, os, sys
 
 try:  # import as appropriate for 2.x vs. 3.x
+<<<<<<< HEAD
    import tkinter as tk
 except:
    import Tkinter as tk
+=======
+    import tkinter as tk
+except:
+    import Tkinter as tk
+>>>>>>> f2074ac64868abc42a45b9ef282380c07467b0dd
 
 
 ##########################################################################
@@ -1012,4 +1018,8 @@ def test():
 update()
 
 if __name__ == "__main__":
+<<<<<<< HEAD
     test()
+=======
+    test()
+>>>>>>> f2074ac64868abc42a45b9ef282380c07467b0dd

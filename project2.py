@@ -167,16 +167,24 @@ def creation():
     # this method defines a series of shapes and button objects
     # these objects are added to a list to be later drawn                                                                                                                    (because thats realistic)
     values = []
-    w = GraphWin("Pull! The shot put game", 400, 400)
+    w = GraphWin("Pull! The shot put game", 400, 600)
     gP = Rectangle(Point(25,40), Point(375, 170))
     t1 = Text(Point(200, 25), "Game Panel")
-    
+
+#Highscores
+    # high scores section and header    
+    rHigh = Rectangle(Point(25, 430), Point(375, 580))
+    tHigh = Text(Point(200, 405), 'High Scores')
+    pHigh = Rectangle(Point(35, 440), Point(345, 570))
+    pHigh.setFill('blue')
+    bHighU = Button(Point(360, 460), 20, 30, '↑', 'light grey')
+    bHighU.activate()
+    bHighD = Button(Point(360, 550), 20, 30, '↓', 'light grey')
+    bHighD.activate()
+#User panel    
     # new game button and colours it
     bNew = Button(Point(85, 75), 110, 50, "New Game", "light green")
     bNew.deactivate('light grey')
-    # high scores button and colours it
-    bHigh = Button(Point(200, 75), 110, 50, "High Scores", "light blue")
-    bHigh.activate()
     # quit button and colours it
     bQuit = Button(Point(315, 75), 110, 50, "Quit", "tomato")
     bQuit.activate()
@@ -225,7 +233,7 @@ def creation():
     values.append(gP)
     values.append(t1)
     values.append(bNew)
-    values.append(bHigh)
+    values.append(rHigh)
     values.append(bQuit)
     #  5 - 9
     values.append(tPlayer)
@@ -257,14 +265,25 @@ def creation():
     values.append(tGVal)
     values.append(bGU)
     values.append(bGD)
-    # 30
+    # 30 - 34
     values.append(bPull)
-    
+    values.append(tHigh)
+    values.append(pHigh)
+    values.append(bHighU)
+    values.append(bHighD)
+    # 35
+    values.append(w)   
     
     return ( w, values )
 
 def drawer(w, values):
     # draws the values that were created in 'creation( )'
+    values[32].draw(w)
+    bg = Rectangle(Point(-1, -1), Point(401, 430))
+    bg.setFill('white')
+    bg.setOutline('white')
+    bg.draw(w)
+    
     for vis in values:
         if(type(vis) == Button):
             # done because the button class has special attributes for drawing
@@ -273,9 +292,15 @@ def drawer(w, values):
             vis.label.draw(w)
         else:
             # all other values
-            vis.draw(w)
+            try:
+                vis.draw(w)
+            except:
+                print(vis)
 
-    values.append(w)
+    # TODO
+    '''
+    Modify drawer to layer the highscores panel to be the first drawn then skipped
+    '''
     return values
 def diskClicked(disk, p):
     # method for the game to make conditionals easier to read
@@ -412,8 +437,15 @@ def operation(values, ngW):
     tGVal = values[27]
     bGU = values[28]
     bGD = values[29]
-    bPull = values[30]
-    w = values[31]
+    bPull = values[30]    
+    pHigh = values[32]
+    bHighU = values[33]
+    bHighD = values[34]
+    w = values[35]
+
+    print(values[2],values[3],values[4],values[6],values[9],values[12],values[17],values[18],
+          values[19],values[22],values[23],values[24],values[27],values[28],values[29],values[30],
+          values[32],values[33],values[34], sep = '\n')
 
     while( ePlayer.getText() == '' ):
         # re-check until text is filled
@@ -423,9 +455,21 @@ def operation(values, ngW):
         if(bQuit.clicked(cp) ):
             bQuit.deactivate('light grey')
             w.close()
-        if(bHigh.clicked(cp)):
-            bHigh.activate()
-            highScores()
+        if(bHighU.clicked(cp)):
+            # moves highscore up
+            print('click')
+            bHighU.deactivate('white')
+            pHigh.move(0, 10)
+            sleep(.05)
+            bHighU.activate()
+        if(bHighD.clicked(cp)):
+            # moves highscore down
+            print('click')
+            bHighD.deactivate('white')
+            pHigh.move(0, -10)
+            sleep(.05)
+            bHighD.activate()
+            
     bNew.activate()
     bPull.activate()
     
@@ -443,17 +487,18 @@ def operation(values, ngW):
             bPull.activate()
             
         # active clicks!
-        cp = w.checkMouse()
+        cp = ngW.checkMouse()
     
     # Game buttons
     
     # High Scores
-        if(bHigh.clicked(cp)):
-            # opens the highscore window and does animation
-            bHigh.deactivate('light grey')
-            sleep(.2)
-            bHigh.activate()
-            highScores()
+        if(bHighU.clicked(cp)):
+            # moves highscore up
+            print('click')
+        if(bHighD.clicked(cp)):
+            # moves highscore down
+            print('click')
+            
     # Quit
         if(bQuit.clicked(cp)):
             # sets scores before closing
