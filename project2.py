@@ -162,7 +162,6 @@ def setScores(name, score):
         w.write('\n')
         i += 1
     w.close()
-    
 def creation():
     # this method defines a series of shapes and button objects
     # these objects are added to a list to be later drawn                                                                                                                    (because thats realistic)
@@ -280,7 +279,6 @@ def creation():
     values.append(w)   
     
     return ( w, values )
-
 def drawer(w, values):
     # draws the values that were created in 'creation( )'
     # values[32].draw(w)
@@ -488,9 +486,9 @@ def operation(values, ngW):
     # Name is filled at this point new game and pull are active buttons
     match = 0
     while True:
-        
         if( ePlayer.getText() == ''):
             # if name is removed
+            print('text removed')
             while( ePlayer.getText() == '' ):
                 # re-check until text is filled
                 bNew.deactivate('light grey')
@@ -499,8 +497,8 @@ def operation(values, ngW):
             bPull.activate()
             
         # active clicks!
-        cp = ngW.checkMouse()
-    
+        cp = w.checkMouse()
+        print(cp)
     # Game buttons
     
     # High Scores
@@ -629,12 +627,14 @@ def operation(values, ngW):
         else:
             pullClickable[3] = True
        
+        print(pullClickable)
         # switch operation   
         if( pullClickable[0] and pullClickable[1] and pullClickable[2] and pullClickable[3] ):
             # button colour is changed
             bPull.activate()
             if( bPull.clicked(cp) ):
                 # if user wants to play
+                print('pull works')
                 bPull.deactivate("light grey")
                 sleep(.2)
                 bPull.activate()
