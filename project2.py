@@ -162,9 +162,10 @@ def setScores(name, score):
         w.write('\n')
         i += 1
     w.close()
+    
 def creation():
     # this method defines a series of shapes and button objects
-    # these objects are added to a list to be later drawn later
+    # these objects are added to a list to be later drawn                                                                                                                    (because thats realistic)
     values = []
     w = GraphWin("Pull! The shot put game", 400, 600)
     gP = Rectangle(Point(25,40), Point(375, 170))
@@ -224,9 +225,9 @@ def creation():
     bGU = Button(Point(355, 270), 20, 20, '+', 'light grey')
     bGD = Button(Point(355, 290), 20, 20, '-', 'light grey')
     
-    bPull1 = Button(Point(120, 350), 200, 50, "PULL SINGLE!", "yellow")
+    bPull1 = Button(Point(420, 350), 200, 50, "PULL DOUBLE!", "yellow")
     bPull1.deactivate('pink')
-    bPull2 = Button(Point(420, 350), 200, 50, "PULL DOUBLE!", "yellow")
+    bPull2 = Button(Point(120, 350), 200, 50, "PULL SINGLE!", "yellow")
     bPull2.deactivate('pink')
 
     highList = []
@@ -272,7 +273,7 @@ def creation():
     values.append(bGU)
     values.append(bGD)
     # 30 - 34
-    values.append(bPull)
+    values.append(bPull1)
     values.append(tHigh)
     values.append(highList)
     values.append(bHighU)
@@ -281,6 +282,7 @@ def creation():
     values.append(w)   
     
     return ( w, values )
+
 def drawer(w, values):
     # draws the values that were created in 'creation( )'
     # values[32].draw(w)
@@ -467,7 +469,7 @@ def operation(values, ngW):
     tGVal = values[27]
     bGU = values[28]
     bGD = values[29]
-    bPull = values[30]   
+    bPull1 = values[30]   
     highList = values[32] 
     bHighU = values[33]
     bHighD = values[34]
@@ -476,7 +478,8 @@ def operation(values, ngW):
     while( ePlayer.getText() == '' ):
         # re-check until text is filled
         bNew.deactivate('light grey')
-        bPull.deactivate('pink')
+        bPull1.deactivate('pink')
+        bPull2.deactivate('pink')
         cp = w.checkMouse()
         if(bQuit.clicked(cp) ):
             bQuit.deactivate('light grey')
@@ -505,24 +508,27 @@ def operation(values, ngW):
             bHighD.activate()
             
     bNew.activate()
-    bPull.activate()
+    bPull1.activate()
+    bPull2.activate()
     
     # Name is filled at this point new game and pull are active buttons
     match = 0
     while True:
+        
         if( ePlayer.getText() == ''):
             # if name is removed
-            print('text removed')
             while( ePlayer.getText() == '' ):
                 # re-check until text is filled
                 bNew.deactivate('light grey')
-                bPull.deactivate('pink')
+                bPull1.deactivate('pink')
+                bPull2.deactivate('pink')
             bNew.activate()
-            bPull.activate()
+            bPull1.activate()
+            bPull2.activate()
             
         # active clicks!
-        cp = w.checkMouse()
-        print(cp)
+        cp = ngW.checkMouse()
+    
     # Game buttons
     
     # High Scores
@@ -573,9 +579,11 @@ def operation(values, ngW):
                 while( ePlayer.getText() == '' ):
                     # re-check until text is filled
                     bNew.deactivate('light grey')
-                    bPull.deactivate('pink')
+                    bPull1.deactivate('pink')
+                    bPull2.deactivate('pink')
                 bNew.activate()
-                bPull.activate()
+                bPull1.activate()
+                bPull2.activate()
         
     # Angle, Power, Gravity buttons
         # Angles
@@ -651,17 +659,16 @@ def operation(values, ngW):
         else:
             pullClickable[3] = True
        
-        print(pullClickable)
         # switch operation   
         if( pullClickable[0] and pullClickable[1] and pullClickable[2] and pullClickable[3] ):
             # button colour is changed
-            bPull.activate()
-            if( bPull.clicked(cp) ):
+            bPull1.activate()
+            bPull2.activate()
+            if( bPull1.clicked(cp) ):
                 # if user wants to play
-                print('pull works')
-                bPull.deactivate("light grey")
+                bPull1.deactivate("light grey")
                 sleep(.2)
-                bPull.activate()
+                bPull1.activate()
                 
                 # sets new to be unclickable
                 newClickable[1] = True
@@ -683,9 +690,11 @@ def operation(values, ngW):
                 # re activates button
                 newClickable[1] = False
                 bNew.activate()
-            bPull.activate()
+            bPull1.activate()
+            bPull2.activate()
         else:
-            bPull.deactivate('pink')
+            bPull1.deactivate('pink')
+            bPull2.deactivate('pink')
             
         # holds code for colour change of some buttons to appear
         sleep(.2)
