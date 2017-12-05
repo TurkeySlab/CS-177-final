@@ -165,7 +165,7 @@ def setScores(name, score):
     
 def creation():
     # this method defines a series of shapes and button objects
-    # these objects are added to a list to be later drawn                                                                                                                    (because thats realistic)
+    # these objects are added to a list to be later drawn later
     values = []
     w = GraphWin("Pull! The shot put game", 400, 600)
     gP = Rectangle(Point(25,40), Point(375, 170))
@@ -225,8 +225,10 @@ def creation():
     bGU = Button(Point(355, 270), 20, 20, '+', 'light grey')
     bGD = Button(Point(355, 290), 20, 20, '-', 'light grey')
     
-    bPull = Button(Point(200, 350), 200, 50, "PULL!", "yellow")
-    bPull.deactivate('pink')
+    bPull1 = Button(Point(120, 350), 200, 50, "PULL SINGLE!", "yellow")
+    bPull1.deactivate('pink')
+    bPull2 = Button(Point(420, 350), 200, 50, "PULL DOUBLE!", "yellow")
+    bPull2.deactivate('pink')
 
     highList = []
     y = 450
@@ -376,11 +378,17 @@ def newGame(w, pwr, ang, grvy, points, rnd):
         cp = w.checkMouse()
         rP = dskR.getCenter()
         lP = dskL.getCenter()
+        rr = rabR.getCenter()
+        lr = rabl.getCenter()
         
         if( diskClicked(dskR, cp) ):
             # if the right moving disk is clicked
+# addes hit marker 
+            l = Text(Point(cp.getX(), cp.getY() - 30),"hit")
+            l.draw(w)
             points += .5
             dskR.undraw()
+            rabR.undraw()
             R = 1
         if( diskClicked(dskL, cp) ):
             # if the left moving disk is clicked
@@ -389,6 +397,7 @@ def newGame(w, pwr, ang, grvy, points, rnd):
             r.draw(w)
             points += .5
             dskL.undraw()
+            rabL.undraw()
             L = 1
             
         if( rP.getX() >= 600 or rP.getY() >= 450 ):
@@ -397,12 +406,20 @@ def newGame(w, pwr, ang, grvy, points, rnd):
         if( lP.getX() <= 0 or lP.getY() >= 450 ):
             # conditional to check if left moving disk is in play
             L = 1
+        if( rr.getX() >= 600 or rr.getY() >= 450 ):
+            # conditional to check if right moving disk is in play
+            Q = 1
+        if( ll.getX() <= 0 or ll.getY() >= 450 ):
+            # conditional to check if left moving disk is in play
+            T = 1
             
-        if( L == 1 and R == 1 ):
+        if( L == 1 and R == 1 and Q == 1 and T == 1):
             # conditional to break the loop if the balls are done
             print("end")
             dskL.undraw()
             dskR.undraw()
+            rabR.undraw()
+            rabL.undraw()
             break
 
         print(dx,dy, sep = '\t\t')
@@ -414,6 +431,13 @@ def newGame(w, pwr, ang, grvy, points, rnd):
         if( L == 0):
             # moves when not out of bounds
             dskL.move(-dx, dy)
+        if( Q == 0):
+            # moves when not out of bounds
+            rabR.move(dx, 0)
+        if( T == 0):
+            # moves when not out of bounds
+            rabL.move(-dx, 0)
+            
             
         # unable to get perfect trajectory equation
         dy += 1/ grvy
