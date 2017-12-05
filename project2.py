@@ -272,13 +272,14 @@ def creation():
     values.append(bGU)
     values.append(bGD)
     # 30 - 34
-    values.append(bPull)
+    values.append(bPull1)
     values.append(tHigh)
     values.append(highList)
     values.append(bHighU)
     values.append(bHighD)
     # 35
-    values.append(w)   
+    values.append(w) 
+    values.append(bPull2)  
     
     return ( w, values )
 def drawer(w, values):
@@ -377,7 +378,7 @@ def newGame(w, pwr, ang, grvy, points, rnd):
         rP = dskR.getCenter()
         lP = dskL.getCenter()
         rr = rabR.getCenter()
-        lr = rabl.getCenter()
+        lr = rabL.getCenter()
         
         if( diskClicked(dskR, cp) ):
             # if the right moving disk is clicked
@@ -407,7 +408,7 @@ def newGame(w, pwr, ang, grvy, points, rnd):
         if( rr.getX() >= 600 or rr.getY() >= 450 ):
             # conditional to check if right moving disk is in play
             Q = 1
-        if( ll.getX() <= 0 or ll.getY() >= 450 ):
+        if( lr.getX() <= 0 or lr.getY() >= 450 ):
             # conditional to check if left moving disk is in play
             T = 1
             
