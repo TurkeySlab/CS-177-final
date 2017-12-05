@@ -175,8 +175,8 @@ def creation():
     # high scores section and header    
     rHigh = Rectangle(Point(25, 430), Point(375, 580))
     tHigh = Text(Point(200, 405), 'High Scores')
-    pHigh = Rectangle(Point(35, 440), Point(345, 570))
-    pHigh.setFill('blue')
+    pHigh = 'null'
+    
     bHighU = Button(Point(360, 460), 20, 30, '↑', 'light grey')
     bHighU.activate()
     bHighD = Button(Point(360, 550), 20, 30, '↓', 'light grey')
@@ -228,6 +228,11 @@ def creation():
     bPull = Button(Point(200, 350), 200, 50, "PULL!", "yellow")
     bPull.deactivate('pink')
 
+    highList = []
+    y = 450
+    for i in range(10):
+        highList.append( Text(Point(35, y), i))
+        y += 50
 # appending to the later return in a more organized style
     #  0 - 4
     values.append(gP)
@@ -268,7 +273,7 @@ def creation():
     # 30 - 34
     values.append(bPull)
     values.append(tHigh)
-    values.append(pHigh)
+    values.append(highList)
     values.append(bHighU)
     values.append(bHighD)
     # 35
@@ -278,7 +283,10 @@ def creation():
 
 def drawer(w, values):
     # draws the values that were created in 'creation( )'
-    values[32].draw(w)
+    # values[32].draw(w)
+    for i in values[32]:
+        i.draw(w)
+        
     bg = Rectangle(Point(-1, -1), Point(401, 430))
     bg.setFill('white')
     bg.setOutline('white')
@@ -416,10 +424,10 @@ def newGame(w, pwr, ang, grvy, points, rnd):
         
     
     return round((points/rnd * 100), 2)
-    
 def operation(values, ngW):
     pullClickable = [False, False, False, False]  # Angle, Power, Gravity, Name
     newClickable  = [False, True]                 # Name, !running game
+    highIndex     = -1                             # used to keep the highscores view window between min and max values
 
     # creates variables form list of all graphics objects
     bNew = values[2]
@@ -437,15 +445,11 @@ def operation(values, ngW):
     tGVal = values[27]
     bGU = values[28]
     bGD = values[29]
-    bPull = values[30]    
-    pHigh = values[32]
+    bPull = values[30]   
+    highList = values[32] 
     bHighU = values[33]
     bHighD = values[34]
     w = values[35]
-
-    print(values[2],values[3],values[4],values[6],values[9],values[12],values[17],values[18],
-          values[19],values[22],values[23],values[24],values[27],values[28],values[29],values[30],
-          values[32],values[33],values[34], sep = '\n')
 
     while( ePlayer.getText() == '' ):
         # re-check until text is filled
@@ -457,16 +461,24 @@ def operation(values, ngW):
             w.close()
         if(bHighU.clicked(cp)):
             # moves highscore up
-            print('click')
             bHighU.deactivate('white')
-            pHigh.move(0, 10)
+            
+            if(highIndex > -1):
+                for i in highList:
+                    i.move(0, 50)
+                highIndex -= 1
+            
             sleep(.05)
             bHighU.activate()
         if(bHighD.clicked(cp)):
             # moves highscore down
-            print('click')
             bHighD.deactivate('white')
-            pHigh.move(0, -10)
+            
+            if(highIndex < 6):
+                for i in highList:
+                    i.move(0, -50)
+                highIndex += 1
+          
             sleep(.05)
             bHighD.activate()
             
@@ -494,10 +506,27 @@ def operation(values, ngW):
     # High Scores
         if(bHighU.clicked(cp)):
             # moves highscore up
-            print('click')
+            bHighU.deactivate('white')
+           
+            if(highIndex > -1):
+                for i in highList:
+                    i.move(0, 50)
+                highIndex -= 1
+           
+            sleep(.05)
+            bHighU.activate()
+            
         if(bHighD.clicked(cp)):
             # moves highscore down
-            print('click')
+            bHighD.deactivate('white')
+            
+            if(highIndex < 6):
+                for i in highList:
+                    i.move(0, -50)
+                highIndex += 1
+            
+            sleep(.05)
+            bHighD.activate()
             
     # Quit
         if(bQuit.clicked(cp)):
