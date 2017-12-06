@@ -168,6 +168,7 @@ def creation():
     # these objects are added to a list to be later drawn                                                                                                                    (because thats realistic)
     values = []
     w = GraphWin("Pull! The shot put game", 400, 600)
+    w.setBackground('white')
     gP = Rectangle(Point(25,40), Point(375, 170))
     t1 = Text(Point(200, 25), "Game Panel")
 
@@ -225,9 +226,9 @@ def creation():
     bGU = Button(Point(355, 270), 20, 20, '+', 'light grey')
     bGD = Button(Point(355, 290), 20, 20, '-', 'light grey')
     
-    bPull1 = Button(Point(420, 350), 200, 50, "PULL DOUBLE!", "yellow")
+    bPull1 = Button(Point(290, 350), 150, 50, "PULL DOUBLE!", "yellow")
     bPull1.deactivate('pink')
-    bPull2 = Button(Point(120, 350), 200, 50, "PULL SINGLE!", "yellow")
+    bPull2 = Button(Point(110, 350), 150, 50, "PULL SINGLE!", "yellow")
     bPull2.deactivate('pink')
 
     highList = []
@@ -278,7 +279,7 @@ def creation():
     values.append(highList)
     values.append(bHighU)
     values.append(bHighD)
-    # 35
+    # 35 - 36
     values.append(w) 
     values.append(bPull2)  
     
@@ -306,12 +307,12 @@ def drawer(w, values):
             try:
                 vis.draw(w)
             except:
-                print(vis)
-
-    # TODO
-    '''
-    Modify drawer to layer the highscores panel to be the first drawn then skipped
-    '''
+                pass
+    lbg = Rectangle(Point(-1, 581), Point(601, 601))
+    lbg.setFill('white')
+    lbg.setOutline('white')
+    lbg.draw(w)
+    
     return values
 def diskClicked(disk, p):
     # method for the game to make conditionals easier to read
@@ -336,33 +337,79 @@ def newGameWindow():
     drt.setFill('#00a202')
     drt.setOutline('#00a202')
    
-    # Draws the stuff ( like the method says )
     Image(Point(300,225),'background.png').draw(w)
     drt.draw(w)
     
     return w
-def newGame(w, pwr, ang, grvy, points, rnd):
-    # creates the disk and holds all game related things
-    dskL = Circle(Point(590, int(randint(350, 450))), 8)
-    dskR = Circle(Point(10, int(randint(350, 450))), 8)
-    rabL = Circle(Point(590, 450), 8)
-    rabR = Circle(Point(10 , 450), 8)
+def newGame(w, pwr, ang, grvy, points, rnd, pullT):
+    # creates the disks
+    dskL = Circle(Point(590, int(randint(350, 450))), 10)
+    dskR = Circle(Point(10,  int(randint(350, 450))), 10)
+    rabL = Circle(Point(590, int(randint(350, 450))), 10)
+    rabR = Circle(Point(10 , int(randint(350, 450))), 10)
+    
     dskL.setFill('dark grey')
     dskR.setFill('dark grey')
     rabL.setFill('dark grey')
     rabR.setFill('dark grey')
     
-    rand = randint(1, 10)
+    # Creats the clouds 
+    clouds = [Image(Point(randint(-150, -100), randint(0, 375)), "cloud.png"), Image(Point(randint(-100, -50), randint(0, 375)), "cloud.png"),
+              Image(Point(randint(-50, 0), randint(0, 375)), "cloud.png"),     Image(Point(randint(0, 50), randint(0, 375)), "cloud.png"),
+              Image(Point(randint(50, 100), randint(0, 375)), "cloud.png"),    Image(Point(randint(100, 150), randint(0, 375)), "cloud.png"),
+              Image(Point(randint(150, 200), randint(0, 375)), "cloud.png"),   Image(Point(randint(200, 250), randint(0, 375)), "cloud.png")]
     
-    if rand >= 5:
-        dskL.draw(w)
-        dskR.draw(w)
-    else:
-        rabL.draw(w)
-        rabR.draw(w)
+    # conditionals for when the disks are done 
+    pL, pR, rL, rR = 0, 0, 0, 0
     
-    # special conditionals for when the disks are done 
-    L, R = 0, 0
+    
+    # determines what is drawn for this game
+    if( pullT == 1 ):
+        # when there is one disk
+        if( randint(1, 10) >= 5 ):
+            # disk will be on the left side
+            if( randint(1, 10) >= 5 ):
+                # disk is a rabbit
+                rabL.draw(w)
+                rR = 1
+            else:
+                # disk is a pigeon
+                dskL.draw(w)
+                pR = 1
+        else:
+            # disk will be on the right side
+            if( randint(1, 10) >= 5 ):
+                # disk is a rabbit
+                rabR.draw(w)
+                rL = 1
+            else:
+                # disk is a pigeon
+                dskR.draw(w)
+                pL = 1
+    if( pullT == 2 ):
+        # when there are 2 disks 
+        if( randint(1, 10) >= 5 ):
+            # disks are rabbits
+            rabL.draw(w)
+            rabR.draw(w)
+        else:
+            # disks are pigeons
+            dskL.draw(w)
+            dskR.draw(w)  
+    
+    cloudliness = randint(0, 8)
+    print(cloudliness)
+     
+    while( cloudliness < len(clouds) ):
+        # picks random cloud of the 4 and draws it
+        try:
+            clouds[ randint(0, 7) ].draw(w)
+        except:
+            # when the random cloud has already been drawn
+            pass
+        
+        cloudliness += 1
+    
     # movement values
     dx = pwr * cos(radians(ang))
     if(dx < 0):
@@ -377,71 +424,103 @@ def newGame(w, pwr, ang, grvy, points, rnd):
         
         # re defines variables for conditionals 
         cp = w.checkMouse()
-        rP = dskR.getCenter()
-        lP = dskL.getCenter()
-        rr = rabR.getCenter()
-        lr = rabL.getCenter()
+        rPCent = dskR.getCenter()
+        lPCent = dskL.getCenter()
+        rRCent = rabR.getCenter()
+        lRCent = rabL.getCenter()
         
         if( diskClicked(dskR, cp) ):
             # if the right moving disk is clicked
-# addes hit marker 
-            l = Text(Point(cp.getX(), cp.getY() - 30),"hit")
-            l.draw(w)
+            hm1 = Image(Point(cp.getX(), cp.getY()),"hitMarker.png")
+            hm1.draw(w)
             points += .5
             dskR.undraw()
-            rabR.undraw()
-            R = 1
+            pR = 1
         if( diskClicked(dskL, cp) ):
             # if the left moving disk is clicked
-# addes hit marker 
-            r = Text(Point(cp.getX(), cp.getY() - 30),"hit")
-            r.draw(w)
+            hm2 = Image(Point(cp.getX(), cp.getY()),"hitMarker.png")
+            hm2.draw(w)
             points += .5
             dskL.undraw()
+            pL = 1
+        if( diskClicked(rabR, cp) ):
+            hm3 = Image(Point(cp.getX(), cp.getY()),"hitMarker.png")
+            hm3.draw(w)
+            points += .5
+            rabR.undraw()
+            rR = 1
+        if( diskClicked(rabL, cp) ):
+            hm4 = Image(Point(cp.getX(), cp.getY()),"hitMarker.png")
+            hm4.draw(w)
+            points += .5
             rabL.undraw()
-            L = 1
-            
-        if( rP.getX() >= 600 or rP.getY() >= 450 ):
+            rL = 1
+        
+        if( rPCent.getX() >= 600 or rPCent.getY() > 450 ):
             # conditional to check if right moving disk is in play
-            R = 1
-        if( lP.getX() <= 0 or lP.getY() >= 450 ):
+            pR = 1
+        if( lPCent.getX() <= 0 or lPCent.getY() > 450 ):
             # conditional to check if left moving disk is in play
-            L = 1
-        if( rr.getX() >= 600 or rr.getY() >= 450 ):
+            pL = 1
+        if( rRCent.getX() >= 600 or rRCent.getY() > 450 ):
             # conditional to check if right moving disk is in play
-            Q = 1
-        if( lr.getX() <= 0 or lr.getY() >= 450 ):
+            rR = 1
+        if( lRCent.getX() <= 0 or lRCent.getY() > 450 ):
             # conditional to check if left moving disk is in play
-            T = 1
-            
-        if( L == 1 and R == 1 and Q == 1 and T == 1):
+            rL = 1
+         
+        if( pL == 1 and pR == 1 or rR == 1 and rL == 1):
             # conditional to break the loop if the balls are done
             print("end")
+            sleep(.5)
+            # tests and removes hit boxes
+            try:
+                hm1.undraw()
+            except:
+                pass
+            try:
+                hm2.undraw()
+            except:
+                pass
+            try:
+                hm3.undraw()
+            except:
+                pass
+            try:
+                hm4.undraw()
+            except:
+                pass
+            
+            for i in clouds:
+                i.undraw()
+            
             dskL.undraw()
             dskR.undraw()
             rabR.undraw()
             rabL.undraw()
             break
 
-        print(dx,dy, sep = '\t\t')
+        # print(dx,dy, sep = '\t\t')
         
         # moves the disks after all conditions are done
-        if( R == 0):
+        if( pR == 0):
             # moves when not out of bounds
             dskR.move(dx, dy)
-        if( L == 0):
+        if( pL == 0):
             # moves when not out of bounds
             dskL.move(-dx, dy)
-        if( Q == 0):
+        if( rR == 0):
             # moves when not out of bounds
             rabR.move(dx, 0)
-        if( T == 0):
+        if( rL == 0):
             # moves when not out of bounds
             rabL.move(-dx, 0)
-            
-            
+        for i in clouds:
+            i.move(5, 0)    
+           
         # unable to get perfect trajectory equation
         dy += 1/ grvy
+        
         # dx = pwr * cos(radians(ang))
         # dy = pwr * sin(radians(ang)) - 1/grvy
         # print(dx, dy, sep ="\t|\t")
@@ -456,7 +535,6 @@ def operation(values, ngW):
 
     # creates variables form list of all graphics objects
     bNew = values[2]
-    bHigh = values[3]
     bQuit = values[4]
     ePlayer = values[6]
     tRound = values[9]
@@ -475,6 +553,7 @@ def operation(values, ngW):
     bHighU = values[33]
     bHighD = values[34]
     w = values[35]
+    bPull2 = values[36]
 
     while( ePlayer.getText() == '' ):
         # re-check until text is filled
@@ -482,6 +561,7 @@ def operation(values, ngW):
         bPull1.deactivate('pink')
         bPull2.deactivate('pink')
         cp = w.checkMouse()
+        
         if(bQuit.clicked(cp) ):
             bQuit.deactivate('light grey')
             w.close()
@@ -528,12 +608,12 @@ def operation(values, ngW):
             bPull2.activate()
             
         # active clicks!
-        cp = ngW.checkMouse()
+        cp = w.checkMouse()
     
     # Game buttons
     
     # High Scores
-        if(bHighU.clicked(cp)):
+        if( bHighU.clicked(cp) ):
             # moves highscore up
             bHighU.deactivate('white')
            
@@ -545,7 +625,7 @@ def operation(values, ngW):
             sleep(.05)
             bHighU.activate()
             
-        if(bHighD.clicked(cp)):
+        if( bHighD.clicked(cp) ):
             # moves highscore down
             bHighD.deactivate('white')
             
@@ -558,7 +638,7 @@ def operation(values, ngW):
             bHighD.activate()
             
     # Quit
-        if(bQuit.clicked(cp)):
+        if( bQuit.clicked(cp) ):
             # sets scores before closing
             bQuit.deactivate('light grey')
             sleep(.5)
@@ -588,7 +668,7 @@ def operation(values, ngW):
         
     # Angle, Power, Gravity buttons
         # Angles
-        if(bAU.clicked(cp)):
+        if( bAU.clicked(cp) ):
             bAU.deactivate('red')
             if( int(tAVal.getText()) >= 60 ):
                 tAVal.setText('60')
@@ -596,7 +676,7 @@ def operation(values, ngW):
                 tAVal.setText('30')
             else:
                 tAVal.setText(int(tAVal.getText()) + 1)
-        if(bAD.clicked(cp)):
+        if( bAD.clicked(cp) ):
             bAD.deactivate('red')
             if( int(tAVal.getText()) <= 30 ):
                 tAVal.setText('30')
@@ -605,7 +685,7 @@ def operation(values, ngW):
             else:
                 tAVal.setText(int(tAVal.getText()) - 1)
     # Power       
-        if(bPU.clicked(cp)):
+        if( bPU.clicked(cp) ):
             bPU.deactivate('red')
             if( int(tPVal.getText()) >= 50 ):
                 tPVal.setText('50')
@@ -613,7 +693,7 @@ def operation(values, ngW):
                 tPVal.setText('5')
             else:
                 tPVal.setText(int(tPVal.getText()) + 1)
-        if(bPD.clicked(cp)):
+        if( bPD.clicked(cp) ):
             bPD.deactivate('red')
             if( int(tPVal.getText()) <= 5):
                 tPVal.setText('5')
@@ -622,7 +702,7 @@ def operation(values, ngW):
             else:
                 tPVal.setText(int(tPVal.getText()) - 1)
     # Gravity     
-        if(bGU.clicked(cp)):
+        if( bGU.clicked(cp) ):
             bGU.deactivate('red')
             if( int(tGVal.getText()) >= 25):
                 tGVal.setText('25')
@@ -630,7 +710,7 @@ def operation(values, ngW):
                 tGVal.setText('3')
             else:
                 tGVal.setText(int(tGVal.getText()) + 1)
-        if(bGD.clicked(cp)):
+        if( bGD.clicked(cp) ):
             bGD.deactivate('red')
             if( int(tGVal.getText()) <= 3 ):
                 tGVal.setText('3')
@@ -666,6 +746,10 @@ def operation(values, ngW):
             bPull1.activate()
             bPull2.activate()
             if( bPull1.clicked(cp) ):
+                '''
+                When there are  2  disks
+                '''
+                
                 # if user wants to play
                 bPull1.deactivate("light grey")
                 sleep(.2)
@@ -678,7 +762,8 @@ def operation(values, ngW):
                 match += 1
          
                 cp = w.checkMouse()
-                if(bQuit.clicked(cp)):
+                
+                if( bQuit.clicked(cp) ):
                     # sets scores before closing
                     bQuit.deactivate('light grey')
                     sleep(.5)
@@ -687,10 +772,42 @@ def operation(values, ngW):
 
                 tRound.setText(str(match))
                 tPoint.setText( newGame( ngW, int(tPVal.getText()), int(tAVal.getText()), 
-                                             int(tGVal.getText()), int(tPoint.getText()), int(tRound.getText()) )     )
+                                         int(tGVal.getText()), int(tPoint.getText()), 
+                                         int(tRound.getText()), 2 )     )
+            if( bPull2.clicked(cp) ):
+                '''
+                When there are  1  disks
+                '''
+                
+                # if user wants to play
+                bPull2.deactivate("light grey")
+                sleep(.2)
+                bPull2.activate()
+                
+                # sets new to be unclickable
+                newClickable[1] = True
+                bNew.deactivate('light grey')
+                
+                match += 1
+         
+                cp = w.checkMouse()
+                
+                if( bQuit.clicked(cp) ):
+                    # sets scores before closing
+                    bQuit.deactivate('light grey')
+                    sleep(.5)
+                    setScores(ePlayer.getText(), tPoint.getText())
+                    w.close()
+
+                tRound.setText(str(match))
+                tPoint.setText( newGame( ngW, int(tPVal.getText()), int(tAVal.getText()), 
+                                         int(tGVal.getText()), int(tPoint.getText()), 
+                                         int(tRound.getText()), 1 )     )
                 # re activates button
                 newClickable[1] = False
                 bNew.activate()
+                
+            
             bPull1.activate()
             bPull2.activate()
         else:
