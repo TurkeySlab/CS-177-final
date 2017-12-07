@@ -10,7 +10,8 @@ from graphics import*
 from math     import*
 from random   import randint
 from time     import sleep, time
-# rthias sisdclass Button:
+
+class Button:
     # This class creates button objects to be used on the GUI panel
     def __init__(self, center, width, height, label, colour):
         # constrcutor
@@ -49,119 +50,58 @@ from time     import sleep, time
         except: 
             return click
 # ===== ===== ===== ===== ===== ===== ===== ===== ===== #
-def highScores():
-    # initializes variables
-    w = GraphWin("High Scores!", 200, 400)
-    w.setBackground("navy")
-    rBox = Rectangle(Point(10,10), Point(190, 360))
-    rBox.setOutline("white")
-    rBox.setWidth("5")
-    bClose = Button(Point(100,380), 150, 30, "Close!", "white")
-    # draws objects
-    bClose.rect.draw(w)
-    bClose.label.draw(w)
-    rBox.draw(w)
-    
-    # used for displaying scores
-    lables = ['1.','2.','3.','4.','5.','6.','7.','8.','9.','10.']
-    scores = getScores()
-    
-    # removes header from scores list
-    del scores[0]
-    del scores[0]
-    
-    yVal = 70
-    i = 0
-    while i < 10:
-        # prints the position labels
-        place = Text(Point(30, yVal), i)
-        place.setTextColor('white')
-        place.draw(w)
-        try:
-            # prints the score and assoiated name for the top ten
-            name = Text(Point(100, yVal), "{0:^15}".format(scores[i][0]) )
-            score = Text(Point(170, yVal),"{0:>5}".format(scores[i][1]) )
-            
-            score.setTextColor('white')
-            score.draw(w)
-            
-        except Exception as e:
-            # catchs out of bounds exception and prints place text in empty positions
-            print(e)
-            name = Text(Point(85, yVal), "< Empty >")
-            
-        name.setTextColor('white')
-        name.draw(w)
-        # increase line values
-        yVal += 30
-        i    += 1
-        
-        
-    clicked = False
-    while not clicked:
-        # holds code inside "High Scores" window until closed
-        cp = w.getMouse()
-        if(bClose.clicked(cp)):
-            clicked = True
-            w.close()        
 def getScores():
     # gets the previous high scores
-    r = open("top_scores.txt", "r")
-    # data is stored as
-    # head ( 2 lines ) 
-    # name \t  score \n
-    scores = []
-    for line in r.readlines():
-        # reads into list 'scores' with each element being a list of ['name', 'score']
-        scores.append(line.strip().split('\t'))
+    r = open('top_scores.txt','r')
+    any_list = []
+
+    for i in r.readlines():
+        any_list.append(i.strip().split(':'))
     r.close()
-    # returns the scores list to be used
-    return scores
-def setScores(name, score):
+    d = {}
+    for i in any_list:
+        d[i[0]] = i[1:5]
+
+    return d
+def setScores(name, score, rounds, disks):
     # sets the high scores 
-    added = False
-    try:
-        # checks if the highscores file exists
-        scores = getScores()
-        del scores[0]
-        del scores[0]
+    scores_dict = getScores()
+    
+    # checks if player name is duplicate
+    if name not in scores_dict:
+
+        # if not, corresponding score is assigned to name in dict
+        scores_dict[name] = [score, rounds, disks, possible]
+
+    else:
+        # current player has played games before need to update score
+        current_player = scores_dict[name]
+        current_player[1] = current_player[1] + rounds
+        current_player[2] = current_player[2] + disks
+        current_player[3] = current_player[3] + possible
+
+        current_player[0] = current_player[2]/current_player[3]
         
-        
-        i = 0
-        while( i < len(scores) ):
-            # compares scores
-            if(float(score) >= float(scores[i][1])):
-                added = True
-                scores.insert(i, [name, score])
-                break;
-            i += 1  
-            
-    except Exception as e:
-        print(e)
-        # if it does not program assumes the user is a cheater and adds 
-        # last score to the top_scores and creates the file later
-        scores = [[name, score]]
-    
-    if(len(scores) < 10 and not added):
-        # if the value does not change the high scores listing but the score board is not full
-        # the name is then added to teh end
-        scores.append([name, score])
-    
-    # creates writer and writes header
-    w = open("top_scores.txt", 'w')
-    i = 0
-    w.write("Top 10 Scores\n")
-    w.write("=============\n")
-    
-    while( i < len(scores) ):
-        # writes the high score values into "top_scores.txt" to be used later
-        w.write(scores[i][0])
-        w.write('\t')
-        w.write(str(scores[i][1]))
+        scores_dict[name] = [current_player[0], current_player[1], current_player[2], current_player[3]]
+
+    print(scores_dict)
+
+    sorted_scores = {}
+
+    for key,value in sorted(scores_dict.items(), key =lambda e: e[1][0], reverse = True):
+        sorted_scores[key] = value
+                
+    w = open('top_scores.txt','w')
+
+    for i in sorted_scores:
+        w.write(i)
+        w.write(':')
+        for j in sorted_scores[i]:
+            w.write(j)
+            w.write(':')
         w.write('\n')
-        i += 1
     w.close()
-    
+
 def creation():
     # this method defines a series of shapes and button objects
     # these objects are added to a list to be later drawn                                                                                                                    (because thats realistic)
