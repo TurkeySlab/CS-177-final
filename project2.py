@@ -10,7 +10,8 @@ from graphics import*
 from math     import*
 from random   import randint
 from time     import sleep, time
-# rthias sisdclass Button:
+
+class Button:
     # This class creates button objects to be used on the GUI panel
     def __init__(self, center, width, height, label, colour):
         # constrcutor
