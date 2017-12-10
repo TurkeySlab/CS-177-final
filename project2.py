@@ -10,6 +10,7 @@ from graphics import*
 from math     import*
 from random   import randint
 from time     import sleep, time
+from platform import platform
 
 class Button:
     # This class creates button objects to be used on the GUI panel
@@ -51,7 +52,7 @@ class Button:
             return click
 # ===== ===== ===== ===== ===== ===== ===== ===== ===== #
 def getScores():
-    # gets the previous high scores
+    # gets the current high scores as stored in "top_scores.txt"
     r = open('top_scores.txt','r')
     any_list = []
 
@@ -59,12 +60,16 @@ def getScores():
         any_list.append(i.strip().split(':'))
     r.close()
     d = {}
-    for i in any_list:
-        d[i[0]] = i[1:5]
-
+    try:
+        for i in any_list:
+            d[i[0]] = [ float(i[1]), int(i[2]), int(i[3]), int(i[4]) ]
+    except:
+        return d
     return d
-def setScores(name, score, rounds, disks):
+def setScores(name, score, rounds, disks, possible):
     # sets the high scores 
+    print('name', 'score', 'rounds', 'disks', 'possible', sep = '\t')
+    print(name, score, rounds, disks, possible, sep = '\t')
     scores_dict = getScores()
     
     # checks if player name is duplicate
@@ -76,31 +81,45 @@ def setScores(name, score, rounds, disks):
     else:
         # current player has played games before need to update score
         current_player = scores_dict[name]
-        current_player[1] = current_player[1] + rounds
-        current_player[2] = current_player[2] + disks
-        current_player[3] = current_player[3] + possible
+        
+        print('\tchanges:', current_player)
+        print('\t       :',score, rounds, disks, possible)
+        
+        current_player[1] = int(current_player[1]) + 1
+        current_player[2] = disks
+        current_player[3] = possible
+        
+        print(current_player)
 
-        current_player[0] = current_player[2]/current_player[3]
+        try:
+            current_player[0] = (current_player[2]/current_player[3]) * 100
+        except:
+            current_player[0] = 0
         
         scores_dict[name] = [current_player[0], current_player[1], current_player[2], current_player[3]]
 
-    print(scores_dict)
 
     sorted_scores = {}
+    
 
-    for key,value in sorted(scores_dict.items(), key =lambda e: e[1][0], reverse = True):
+    for key,value in sorted(scores_dict.items(), key = lambda e: e[1][0], reverse = True):
         sorted_scores[key] = value
                 
     w = open('top_scores.txt','w')
 
     for i in sorted_scores:
-        w.write(i)
+        w.write(str(i))
         w.write(':')
         for j in sorted_scores[i]:
-            w.write(j)
+            w.write(str(j))
             w.write(':')
         w.write('\n')
     w.close()
+    
+    try:
+        return current_player
+    except:
+        return
 
 def creation():
     # this method defines a series of shapes and button objects
@@ -280,7 +299,7 @@ def newGameWindow():
     drt.draw(w)
     
     return w
-def newGame(w, pwr, ang, grvy, points, rnd, pullT):
+def newGame(w, pwr, ang, grvy, points, rnd, pullT, possible, disks):
     # creates the disks
     dskL = Circle(Point(590, int(randint(350, 450))), 10)
     dskR = Circle(Point(10,  int(randint(350, 450))), 10)
@@ -369,26 +388,32 @@ def newGame(w, pwr, ang, grvy, points, rnd, pullT):
         lRCent = rabL.getCenter()
         
         if( diskClicked(dskR, cp) ):
-            # if the right moving disk is clicked
+            # if the right pigeon disk is clicked
+            disks += 1
             hm1 = Image(Point(cp.getX(), cp.getY()),"hitMarker.png")
             hm1.draw(w)
             points += .5
             dskR.undraw()
             pR = 1
         if( diskClicked(dskL, cp) ):
-            # if the left moving disk is clicked
+            # if the left pigeon disk is clicked
+            disks += 1
             hm2 = Image(Point(cp.getX(), cp.getY()),"hitMarker.png")
             hm2.draw(w)
             points += .5
             dskL.undraw()
             pL = 1
         if( diskClicked(rabR, cp) ):
+            # if the right rabbit disk is clicked
+            disks += 1
             hm3 = Image(Point(cp.getX(), cp.getY()),"hitMarker.png")
             hm3.draw(w)
             points += .5
             rabR.undraw()
             rR = 1
         if( diskClicked(rabL, cp) ):
+            # if the left rabbit disk is clicked
+            disks += 1
             hm4 = Image(Point(cp.getX(), cp.getY()),"hitMarker.png")
             hm4.draw(w)
             points += .5
@@ -410,7 +435,6 @@ def newGame(w, pwr, ang, grvy, points, rnd, pullT):
          
         if( pL == 1 and pR == 1 or rR == 1 and rL == 1):
             # conditional to break the loop if the balls are done
-            print("end")
             sleep(.5)
             # tests and removes hit boxes
             try:
@@ -457,21 +481,16 @@ def newGame(w, pwr, ang, grvy, points, rnd, pullT):
         for i in clouds:
             i.move(5, 0)    
            
-        # unable to get perfect trajectory equation
         dy += 1/ grvy
-        
-        # dx = pwr * cos(radians(ang))
-        # dy = pwr * sin(radians(ang)) - 1/grvy
-        # print(dx, dy, sep ="\t|\t")
+    return (( disks / possible ) * 100 ), disks
 
-        
-    
-    return round((points/rnd * 100), 2)
 def operation(values, ngW):
     pullClickable = [False, False, False, False]  # Angle, Power, Gravity, Name
     newClickable  = [False, True]                 # Name, !running game
-    highIndex     = -1                             # used to keep the highscores view window between min and max values
-
+    highIndex     = -1                            # used to keep the highscores view window between min and max values
+    possible, disks = 0, 0                        # used for tracking scores
+    player_dict = getScores()
+    player = None
     # creates variables form list of all graphics objects
     bNew = values[2]
     bQuit = values[4]
@@ -530,7 +549,6 @@ def operation(values, ngW):
     bNew.activate()
     bPull1.activate()
     bPull2.activate()
-    
     # Name is filled at this point new game and pull are active buttons
     match = 0
     while True:
@@ -545,7 +563,16 @@ def operation(values, ngW):
             bNew.activate()
             bPull1.activate()
             bPull2.activate()
-            
+        else: 
+            # checks if the current player exists in previous games
+            if( ePlayer.getText() in player_dict ):
+                if( player == None ):
+                    player = player_dict[ePlayer.getText()]
+                    possible = player[3]
+                    tPoint.setText(player[0])
+                    tRound.setText(player[1])
+                    print('player = ', player, '\n')
+                
         # active clicks!
         cp = w.checkMouse()
     
@@ -688,7 +715,7 @@ def operation(values, ngW):
                 '''
                 When there are  2  disks
                 '''
-                
+                possible += 2
                 # if user wants to play
                 bPull1.deactivate("light grey")
                 sleep(.2)
@@ -709,15 +736,33 @@ def operation(values, ngW):
                     setScores(ePlayer.getText(), tPoint.getText())
                     w.close()
 
-                tRound.setText(str(match))
-                tPoint.setText( newGame( ngW, int(tPVal.getText()), int(tAVal.getText()), 
-                                         int(tGVal.getText()), int(tPoint.getText()), 
-                                         int(tRound.getText()), 2 )     )
+                if player == None:
+                    # if current player does not exist
+                    tRound.setText(str(match))
+                    current_score, disks = newGame( ngW, int(tPVal.getText()), int(tAVal.getText()), 
+                                             int(tGVal.getText()), int(tPoint.getText()), 
+                                             int(tRound.getText()), 2, possible, disks ) 
+                    tPoint.setText( current_score )
+                    setScores(ePlayer.getText(), int(tPoint.getText()), int(tRound.getText()), disks, possible)
+                else:
+                    # if player exists
+                    tRound.setText(str(match))
+                    current_score, disks = newGame( ngW, int(tPVal.getText()), int(tAVal.getText()), 
+                                             int(tGVal.getText()), int(tPoint.getText()), 
+                                             int(tRound.getText()), 2, possible, player[2] ) 
+                    
+                    player = setScores(ePlayer.getText(), int(tPoint.getText()), int(tRound.getText()), disks, possible)
+                    tPoint.setText( current_score )
+                    
+                    
+                newClickable[1] = False
+                bNew.activate()
+                
             if( bPull2.clicked(cp) ):
                 '''
                 When there are  1  disks
                 '''
-                
+                possible += 1
                 # if user wants to play
                 bPull2.deactivate("light grey")
                 sleep(.2)
@@ -738,13 +783,27 @@ def operation(values, ngW):
                     setScores(ePlayer.getText(), tPoint.getText())
                     w.close()
 
-                tRound.setText(str(match))
-                tPoint.setText( newGame( ngW, int(tPVal.getText()), int(tAVal.getText()), 
-                                         int(tGVal.getText()), int(tPoint.getText()), 
-                                         int(tRound.getText()), 1 )     )
+                if player == None:
+                    # if current player does not exist
+                    tRound.setText(str(match))
+                    current_score, disks = newGame( ngW, int(tPVal.getText()), int(tAVal.getText()), 
+                                             int(tGVal.getText()), int(tPoint.getText()), 
+                                             int(tRound.getText()), 1, possible, disks ) 
+                    tPoint.setText( current_score )
+                    setScores(ePlayer.getText(), int(tPoint.getText()), int(tRound.getText()), disks, possible)
+                else:
+                    # if player exists
+                    tRound.setText(str(match))
+                    current_score, disks = newGame( ngW, int(tPVal.getText()), int(tAVal.getText()), 
+                                             int(tGVal.getText()), int(tPoint.getText()), 
+                                             int(tRound.getText()), 1, possible, player[2] ) 
+                    tPoint.setText( current_score )
+                    player = setScores(ePlayer.getText(), int(tPoint.getText()), int(tRound.getText()), disks, possible)
+                    
                 # re activates button
                 newClickable[1] = False
                 bNew.activate()
+                setScores(ePlayer.getText(), int(tPoint.getText()), int(tRound.getText()), disks, possible)
                 
             
             bPull1.activate()
@@ -755,6 +814,10 @@ def operation(values, ngW):
             
         # holds code for colour change of some buttons to appear
         sleep(.2)
+        
+        # set highscores
+        
+        
         
         # resets buttons to be correct state
         bAU.activate()
