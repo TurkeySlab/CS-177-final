@@ -9,8 +9,7 @@
 from graphics import*
 from math     import*
 from random   import randint
-from time     import sleep, time
-from platform import platform
+from time     import sleep
 
 class Button:
     # This class creates button objects to be used on the GUI panel
@@ -92,7 +91,7 @@ def setScores(name, score, rounds, disks, possible):
         print(current_player)
 
         try:
-            current_player[0] = (current_player[2]/current_player[3]) * 100
+            current_player[0] = round( ((current_player[2]/current_player[3]) * 100), 2)
         except:
             current_player[0] = 0
         
@@ -120,7 +119,31 @@ def setScores(name, score, rounds, disks, possible):
         return current_player
     except:
         return
-
+def upDateHigh():
+    highList = []
+    highDict = getScores()
+    place = 1
+    y = 450
+    for i in highDict:
+        if( place > 10 ):
+            # only adds the first 10 places
+            break
+        v = highDict[i]
+        text = Text(Point(180, y), "{0:<3}{1:<16}{2:>5}{3:>5}".format( place, i, v[0], v[2] ) )
+        text.setFace('courier')
+        
+        highList.append( text )
+        place += 1
+        y += 50
+    while( place < 11 ):
+        # populates missing highscores
+        text = Text(Point(180, y), "{0:<3}{1:<16}{2:>5}{3:>5}".format( place, 'None', '0.0', '0' ) )
+        text.setFace('courier')
+        
+        highList.append( text )
+        place += 1
+        y += 50
+    return highList
 def creation():
     # this method defines a series of shapes and button objects
     # these objects are added to a list to be later drawn                                                                                                                    (because thats realistic)
@@ -134,7 +157,6 @@ def creation():
     # high scores section and header    
     rHigh = Rectangle(Point(25, 430), Point(375, 580))
     tHigh = Text(Point(200, 405), 'High Scores')
-    pHigh = 'null'
     
     bHighU = Button(Point(360, 460), 20, 30, '↑', 'light grey')
     bHighU.activate()
@@ -156,7 +178,7 @@ def creation():
     tNum   = Text(Point(200, 145), '0')
     # score display and header text
     tScore = Text(Point(330, 120), "Score")
-    rScore = Rectangle(Point(310, 130), Point(350, 160))
+    rScore = Rectangle(Point(300, 130), Point(360, 160))
     tPoint = Text(Point(330, 145), '0')
     
 #Target Panel
@@ -190,9 +212,27 @@ def creation():
     bPull2.deactivate('pink')
 
     highList = []
+    highDict = getScores()
+    place = 1
     y = 450
-    for i in range(10):
-        highList.append( Text(Point(35, y), i))
+    for i in highDict:
+        if( place > 10 ):
+            # only adds the first 10 places
+            break
+        v = highDict[i]
+        text = Text(Point(180, y), "{0:<3}{1:<16}{2:>5}{3:>5}".format( place, i, v[0], v[2] ) )
+        text.setFace('courier')
+        
+        highList.append( text )
+        place += 1
+        y += 50
+    while( place < 11 ):
+        # populates missing highscores
+        text = Text(Point(180, y), "{0:<3}{1:<16}{2:>5}{3:>5}".format( place, 'None', '0.0', '0' ) )
+        text.setFace('courier')
+        
+        highList.append( text )
+        place += 1
         y += 50
 # appending to the later return in a more organized style
     #  0 - 4
@@ -243,12 +283,35 @@ def creation():
     
     return ( w, values )
 
+def undrawer(values):
+    '''
+    ### WE ADDED THIS IN ###
+    
+    Takes in all old attributes from control window and undraws them
+    This is done to allow for the high scores to properly scroll and be hidden
+        and be properly updated
+    '''
+    for i in values[32]:
+        print(i)
+        i.undraw()
+        
+    for i in values:
+        try:
+            i.undraw()
+        except:
+            try:
+                i.label.undraw()
+                i.rect.undraw()
+            except:
+                # can't undraw a window
+                pass
 def drawer(w, values):
     # draws the values that were created in 'creation( )'
     # values[32].draw(w)
     for i in values[32]:
+        # draws highscores first to have them be "bellow" other attributes for scrolling
         i.draw(w)
-        
+    # upper border for highscores   
     bg = Rectangle(Point(-1, -1), Point(401, 430))
     bg.setFill('white')
     bg.setOutline('white')
@@ -266,6 +329,7 @@ def drawer(w, values):
                 vis.draw(w)
             except:
                 pass
+    # lower border for highscores
     lbg = Rectangle(Point(-1, 581), Point(601, 601))
     lbg.setFill('white')
     lbg.setOutline('white')
@@ -303,8 +367,8 @@ def newGame(w, pwr, ang, grvy, points, rnd, pullT, possible, disks):
     # creates the disks
     dskL = Circle(Point(590, int(randint(350, 450))), 10)
     dskR = Circle(Point(10,  int(randint(350, 450))), 10)
-    rabL = Circle(Point(590, int(randint(350, 450))), 10)
-    rabR = Circle(Point(10 , int(randint(350, 450))), 10)
+    rabL = Circle(Point(590, int(randint(450, 600))), 10)
+    rabR = Circle(Point(10 , int(randint(450, 600))), 10)
     
     dskL.setFill('dark grey')
     dskR.setFill('dark grey')
@@ -426,10 +490,10 @@ def newGame(w, pwr, ang, grvy, points, rnd, pullT, possible, disks):
         if( lPCent.getX() <= 0 or lPCent.getY() > 450 ):
             # conditional to check if left moving disk is in play
             pL = 1
-        if( rRCent.getX() >= 600 or rRCent.getY() > 450 ):
+        if( rRCent.getX() >= 600 ):
             # conditional to check if right moving disk is in play
             rR = 1
-        if( lRCent.getX() <= 0 or lRCent.getY() > 450 ):
+        if( lRCent.getX() <= 0   ):
             # conditional to check if left moving disk is in play
             rL = 1
          
@@ -482,7 +546,7 @@ def newGame(w, pwr, ang, grvy, points, rnd, pullT, possible, disks):
             i.move(5, 0)    
            
         dy += 1/ grvy
-    return (( disks / possible ) * 100 ), disks
+    return round( (( disks / possible ) * 100), 2 ), disks
 
 def operation(values, ngW):
     pullClickable = [False, False, False, False]  # Angle, Power, Gravity, Name
@@ -512,7 +576,7 @@ def operation(values, ngW):
     bHighD = values[34]
     w = values[35]
     bPull2 = values[36]
-
+    
     while( ePlayer.getText() == '' ):
         # re-check until text is filled
         bNew.deactivate('light grey')
@@ -572,7 +636,14 @@ def operation(values, ngW):
                     tPoint.setText(player[0])
                     tRound.setText(player[1])
                     print('player = ', player, '\n')
-                
+            else:
+                player = None
+                tPoint.setText(0)
+                tRound.setText(0)
+            if( len(ePlayer.getText()) >= 15 ):
+                name = ePlayer.getText()
+                name = name[0:16]
+                ePlayer.setText(name)    
         # active clicks!
         cp = w.checkMouse()
     
@@ -744,6 +815,11 @@ def operation(values, ngW):
                                              int(tRound.getText()), 2, possible, disks ) 
                     tPoint.setText( current_score )
                     setScores(ePlayer.getText(), int(tPoint.getText()), int(tRound.getText()), disks, possible)
+                    
+                    undrawer(values)
+                    highList = upDateHigh() 
+                    values[32] = highList      
+                    drawer(w, values)
                 else:
                     # if player exists
                     tRound.setText(str(match))
@@ -754,6 +830,10 @@ def operation(values, ngW):
                     player = setScores(ePlayer.getText(), int(tPoint.getText()), int(tRound.getText()), disks, possible)
                     tPoint.setText( current_score )
                     
+                    undrawer(values)
+                    highList = upDateHigh() 
+                    values[32] = highList      
+                    drawer(w, values)
                     
                 newClickable[1] = False
                 bNew.activate()
@@ -791,6 +871,11 @@ def operation(values, ngW):
                                              int(tRound.getText()), 1, possible, disks ) 
                     tPoint.setText( current_score )
                     setScores(ePlayer.getText(), int(tPoint.getText()), int(tRound.getText()), disks, possible)
+                    
+                    undrawer(values)
+                    highList = upDateHigh() 
+                    values[32] = highList      
+                    drawer(w, values)
                 else:
                     # if player exists
                     tRound.setText(str(match))
@@ -799,11 +884,15 @@ def operation(values, ngW):
                                              int(tRound.getText()), 1, possible, player[2] ) 
                     tPoint.setText( current_score )
                     player = setScores(ePlayer.getText(), int(tPoint.getText()), int(tRound.getText()), disks, possible)
+                   
+                    undrawer(values)
+                    highList = upDateHigh() 
+                    values[32] = highList      
+                    drawer(w, values)
                     
                 # re activates button
                 newClickable[1] = False
                 bNew.activate()
-                setScores(ePlayer.getText(), int(tPoint.getText()), int(tRound.getText()), disks, possible)
                 
             
             bPull1.activate()
@@ -828,7 +917,6 @@ def operation(values, ngW):
         
         bGU.activate()
         bGD.activate()
-        
         
         
     return w
