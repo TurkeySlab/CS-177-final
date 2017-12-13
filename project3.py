@@ -4,6 +4,37 @@
 # project2.py for CS 177
 # This program simulates a pull shot game
 '''
+'''
+  #############################################################################
+ ##########################    Our Custom Additions    #########################
+#################################################################################
+                                                                               ###
+1) Hit-boxes                                                                   ###
+    These boxes appear when the user clicks a disk to show user confirmation   ###
+    that their click was reqistered and that they were given their points      ###
+                                                                               ###
+2) Clouds                                                                      ###
+    Translucent '.png' clouds that hinder the players view of the pigeon disks ###
+    Adds extra random challenge to the game making it more difficult to get a  ###
+    score of 100                                                               ###
+                                                                               ###
+3) 'New name > New game' functionality                                         ###
+    Kept the 'New Game' button, but added in functionality so when a new name  ### 
+    is entered in the player name text box, the previous player's values are   ###
+    reset                                                                      ###
+                                                                               ###
+4) 'Buttons' class                                                             ###
+    Instead of using 'Rectangle' objects from 'graphics.py' we created a class ###
+    that handles all operations for buttons making cleaner conditionals, more  ###
+    readable code, and better functionality                                    ### 
+                                                                               ### 
+5) This pretty box!                                                            ###
+    Reading and finding things can be hard. This way you wont miss a thing!    ###
+                                                                               ###
+#################################################################################
+ ###############################################################################
+  #############################################################################
+'''
 
 
 from graphics import*
@@ -56,62 +87,65 @@ def getScores():
     any_list = []
 
     for i in r.readlines():
-        any_list.append(i.strip().split(':'))
+        any_list.append(i.strip().split('\t'))
     r.close()
     d = {}
     try:
         for i in any_list:
-            d[i[0]] = [ float(i[1]), int(i[2]), int(i[3]), int(i[4]) ]
+            d[i[0]] = [ float(i[1]), int(i[2]) ]
     except:
         return d
     return d
-def setScores(name, score, rounds, disks, possible):
-    # sets the high scores 
-    print('name', 'score', 'rounds', 'disks', 'possible', sep = '\t')
-    print(name, score, rounds, disks, possible, sep = '\t')
+def setScores(name, score, rounds):
+    # sets the high scores with the current score board scores
+    
+    # print('\npoints passed:', score)
+    
+    score = score / 100 * ( rounds )
+    
+    # print('rounds passed:', rounds)
+    # print('points raw   :', score)
+    
     scores_dict = getScores()
     
     # checks if player name is duplicate
     if name not in scores_dict:
 
         # if not, corresponding score is assigned to name in dict
-        scores_dict[name] = [score, rounds, disks, possible]
+        score = round( ((score/rounds) * 100), 2)
+        scores_dict[name] = [score, rounds]
 
     else:
-        # current player has played games before need to update score
+        # when current player has played games before need to update score
         current_player = scores_dict[name]
-        
-        print('\tchanges:', current_player)
-        print('\t       :',score, rounds, disks, possible)
-        
-        current_player[1] = int(current_player[1]) + 1
-        current_player[2] = disks
-        current_player[3] = possible
-        
-        print(current_player)
 
         try:
-            current_player[0] = round( ((current_player[2]/current_player[3]) * 100), 2)
+            # calculates score
+            score = round( ((score/rounds) * 100), 2)
         except:
-            current_player[0] = 0
-        
-        scores_dict[name] = [current_player[0], current_player[1], current_player[2], current_player[3]]
+            # in event that there have been 0 rounds played score is set to 0
+            score = 0
+            
+        # updates current player's score
+        scores_dict[name] = [ score, rounds]
 
-
+    # used to sorts the current scores 
     sorted_scores = {}
     
-
     for key,value in sorted(scores_dict.items(), key = lambda e: e[1][0], reverse = True):
         sorted_scores[key] = value
                 
     w = open('top_scores.txt','w')
 
+    # print('Items  saved :', scores_dict[name])
+    
+    # writes the saved scores to the file
     for i in sorted_scores:
         w.write(str(i))
-        w.write(':')
+        w.write('\t')
         for j in sorted_scores[i]:
             w.write(str(j))
-            w.write(':')
+            w.write('\t')
         w.write('\n')
     w.close()
     
@@ -120,7 +154,11 @@ def setScores(name, score, rounds, disks, possible):
     except:
         return
 def upDateHigh():
+    # resets and formats the high score scroll box to update with the current player 
+    
+    # holds the list of text objects for scrolling
     highList = []
+    # holds current access of high scores
     highDict = getScores()
     place = 1
     y = 450
@@ -128,15 +166,15 @@ def upDateHigh():
         if( place > 10 ):
             # only adds the first 10 places
             break
-        v = highDict[i]
-        text = Text(Point(180, y), "{0:<3}{1:<16}{2:>5}{3:>5}".format( place, i, v[0], v[2] ) )
+        
+        text = Text(Point(180, y), "{0:<3}{1:<16}{2:>5}{3:>5}".format( place, i, highDict[i][0], highDict[i][1] ) )
         text.setFace('courier')
         
         highList.append( text )
         place += 1
         y += 50
     while( place < 11 ):
-        # populates missing highscores
+        # populates missing high scores
         text = Text(Point(180, y), "{0:<3}{1:<16}{2:>5}{3:>5}".format( place, 'None', '0.0', '0' ) )
         text.setFace('courier')
         
@@ -158,9 +196,9 @@ def creation():
     rHigh = Rectangle(Point(25, 430), Point(375, 580))
     tHigh = Text(Point(200, 405), 'High Scores')
     
-    bHighU = Button(Point(360, 460), 20, 30, '↑', 'light grey')
+    bHighU = Button(Point(360, 460), 20, 30, 'â†‘', 'light grey')
     bHighU.activate()
-    bHighD = Button(Point(360, 550), 20, 30, '↓', 'light grey')
+    bHighD = Button(Point(360, 550), 20, 30, 'â†“', 'light grey')
     bHighD.activate()
 #User panel    
     # new game button and colours it
@@ -219,8 +257,7 @@ def creation():
         if( place > 10 ):
             # only adds the first 10 places
             break
-        v = highDict[i]
-        text = Text(Point(180, y), "{0:<3}{1:<16}{2:>5}{3:>5}".format( place, i, v[0], v[2] ) )
+        text = Text(Point(180, y), "{0:<3}{1:<16}{2:>5}{3:>5}".format( place, i, highDict[i][0], highDict[i][1] ) )
         text.setFace('courier')
         
         highList.append( text )
@@ -287,19 +324,21 @@ def undrawer(values):
     '''
     ### WE ADDED THIS IN ###
     
-    Takes in all old attributes from control window and undraws them
-    This is done to allow for the high scores to properly scroll and be hidden
-        and be properly updated
+    Takes in all old attributes from control window and un-draws them
+    This is done to allow for the high scores to properly scroll 'Underneath' the rest of the objects 
+        and be properly updated at the end of each round
     '''
     for i in values[32]:
-        print(i)
+        # un-draws all high score Text objects
         i.undraw()
         
     for i in values:
         try:
+            # un-draws all graphics.py objects
             i.undraw()
         except:
             try:
+                # un-draws Buttons class object's attributes of graphics.py
                 i.label.undraw()
                 i.rect.undraw()
             except:
@@ -309,9 +348,9 @@ def drawer(w, values):
     # draws the values that were created in 'creation( )'
     # values[32].draw(w)
     for i in values[32]:
-        # draws highscores first to have them be "bellow" other attributes for scrolling
+        # draws high scores first to have them be "bellow" other attributes for scrolling
         i.draw(w)
-    # upper border for highscores   
+    # upper border for high scores   
     bg = Rectangle(Point(-1, -1), Point(401, 430))
     bg.setFill('white')
     bg.setOutline('white')
@@ -319,8 +358,9 @@ def drawer(w, values):
     
     for vis in values:
         if(type(vis) == Button):
-            # done because the button class has special attributes for drawing
-            # as it is not a graphics object but a self made class with special attributes
+            '''
+            Handles Button class object's attributes 
+            '''
             vis.rect.draw(w)
             vis.label.draw(w)
         else:
@@ -329,7 +369,7 @@ def drawer(w, values):
                 vis.draw(w)
             except:
                 pass
-    # lower border for highscores
+    # lower border for high scores
     lbg = Rectangle(Point(-1, 581), Point(601, 601))
     lbg.setFill('white')
     lbg.setOutline('white')
@@ -352,18 +392,26 @@ def newGameWindow():
     # creates the actual game to be played
     w = GraphWin("The Game!", 600, 600)
     # Negative done to hide the borders
-    # Creates the sky and ground2:34 PM 11/28/2017
+    # Creates the sky and ground
     sky = Rectangle(Point(-1, -1),   Point(600, 450))
     sky.setFill('#00a2e8')
     drt = Rectangle(Point(-1, 450), Point(600, 600))
     drt.setFill('#00a202')
     drt.setOutline('#00a202')
    
+    # loads sky image
     Image(Point(300,225),'background.png').draw(w)
     drt.draw(w)
     
     return w
-def newGame(w, pwr, ang, grvy, points, rnd, pullT, possible, disks):
+def newGame(w, pwr, ang, grvy, points, rounds, pullT):
+    # sets points to a raw disks clicked value
+    # print('\tpoints passed:', points)
+    
+    points = points / 100 * ( rounds - 1 )
+    
+    # print('\trounds passed:', rounds)
+    # print('\tpoints raw   :', points)
     # creates the disks
     dskL = Circle(Point(590, int(randint(350, 450))), 10)
     dskR = Circle(Point(10,  int(randint(350, 450))), 10)
@@ -420,7 +468,6 @@ def newGame(w, pwr, ang, grvy, points, rnd, pullT, possible, disks):
             dskR.draw(w)  
     
     cloudliness = randint(0, 8)
-    print(cloudliness)
      
     while( cloudliness < len(clouds) ):
         # picks random cloud of the 4 and draws it
@@ -432,14 +479,13 @@ def newGame(w, pwr, ang, grvy, points, rnd, pullT, possible, disks):
         
         cloudliness += 1
     
-    # movement values
+    # movement value calculations
     dx = pwr * cos(radians(ang))
     if(dx < 0):
         dx *= -1
     
     dy = -(pwr * sin(radians(ang)))
         
-    points = points / 100 / rnd
     while( True ):
         # loop runs until the disk are both "shot" or have reached the end
         sleep(.05)
@@ -453,7 +499,6 @@ def newGame(w, pwr, ang, grvy, points, rnd, pullT, possible, disks):
         
         if( diskClicked(dskR, cp) ):
             # if the right pigeon disk is clicked
-            disks += 1
             hm1 = Image(Point(cp.getX(), cp.getY()),"hitMarker.png")
             hm1.draw(w)
             points += .5
@@ -461,7 +506,6 @@ def newGame(w, pwr, ang, grvy, points, rnd, pullT, possible, disks):
             pR = 1
         if( diskClicked(dskL, cp) ):
             # if the left pigeon disk is clicked
-            disks += 1
             hm2 = Image(Point(cp.getX(), cp.getY()),"hitMarker.png")
             hm2.draw(w)
             points += .5
@@ -469,7 +513,6 @@ def newGame(w, pwr, ang, grvy, points, rnd, pullT, possible, disks):
             pL = 1
         if( diskClicked(rabR, cp) ):
             # if the right rabbit disk is clicked
-            disks += 1
             hm3 = Image(Point(cp.getX(), cp.getY()),"hitMarker.png")
             hm3.draw(w)
             points += .5
@@ -477,7 +520,6 @@ def newGame(w, pwr, ang, grvy, points, rnd, pullT, possible, disks):
             rR = 1
         if( diskClicked(rabL, cp) ):
             # if the left rabbit disk is clicked
-            disks += 1
             hm4 = Image(Point(cp.getX(), cp.getY()),"hitMarker.png")
             hm4.draw(w)
             points += .5
@@ -500,7 +542,7 @@ def newGame(w, pwr, ang, grvy, points, rnd, pullT, possible, disks):
         if( pL == 1 and pR == 1 or rR == 1 and rL == 1):
             # conditional to break the loop if the balls are done
             sleep(.5)
-            # tests and removes hit boxes
+            # tests and removes hit boxes that were used
             try:
                 hm1.undraw()
             except:
@@ -527,8 +569,6 @@ def newGame(w, pwr, ang, grvy, points, rnd, pullT, possible, disks):
             rabL.undraw()
             break
 
-        # print(dx,dy, sep = '\t\t')
-        
         # moves the disks after all conditions are done
         if( pR == 0):
             # moves when not out of bounds
@@ -546,13 +586,20 @@ def newGame(w, pwr, ang, grvy, points, rnd, pullT, possible, disks):
             i.move(5, 0)    
            
         dy += 1/ grvy
-    return round( (( disks / possible ) * 100), 2 ), disks
+    # returns points to the displayed value rounded 2 places
+    
+    # print('\trounds points:', rounds, points)
+    
+    points = round(points/rounds * 100, 2)
+    
+    # print('\tPoints return:', points)
+    
+    return points
 
 def operation(values, ngW):
     pullClickable = [False, False, False, False]  # Angle, Power, Gravity, Name
     newClickable  = [False, True]                 # Name, !running game
     highIndex     = -1                            # used to keep the highscores view window between min and max values
-    possible, disks = 0, 0                        # used for tracking scores
     player_dict = getScores()
     player = None
     # creates variables form list of all graphics objects
@@ -587,6 +634,7 @@ def operation(values, ngW):
         if(bQuit.clicked(cp) ):
             bQuit.deactivate('light grey')
             w.close()
+            break
         if(bHighU.clicked(cp)):
             # moves highscore up
             bHighU.deactivate('white')
@@ -615,6 +663,7 @@ def operation(values, ngW):
     bPull2.activate()
     # Name is filled at this point new game and pull are active buttons
     match = 0
+    
     while True:
         
         if( ePlayer.getText() == ''):
@@ -632,15 +681,31 @@ def operation(values, ngW):
             if( ePlayer.getText() in player_dict ):
                 if( player == None ):
                     player = player_dict[ePlayer.getText()]
-                    possible = player[3]
                     tPoint.setText(player[0])
                     tRound.setText(player[1])
-                    print('player = ', player, '\n')
+                    # print('player = ', player, '\n')
             else:
-                player = None
-                tPoint.setText(0)
-                tRound.setText(0)
+                try:
+                    if( int(tRound.getText()) == player[1] ):
+                        # resets the rounds and scores when a new name is entered
+                        # acts as a new game function
+                        
+                        # print("player reset successful")
+                        
+                        tPoint.setText(0)
+                        tRound.setText(0)
+                except:
+                    # caught if the first name entered is not a previous player
+                    # because nothing has changed due to previous entries, nothing is reset 
+                    pass
+                if( int(tRound.getText()) >= 1 ):
+                    player = [tPoint.getText(), tRound.getText()]
+                
             if( len(ePlayer.getText()) >= 15 ):
+                '''
+                Group added code 
+                Limited player name to 15 characters to allow for good text formatting in the highscores scrolling window
+                '''
                 name = ePlayer.getText()
                 name = name[0:16]
                 ePlayer.setText(name)    
@@ -679,8 +744,9 @@ def operation(values, ngW):
             # sets scores before closing
             bQuit.deactivate('light grey')
             sleep(.5)
-            setScores(ePlayer.getText(), tPoint.getText())
+            setScores(ePlayer.getText(), int(tPoint.getText()), int(tRound.getText()))
             w.close()
+            break
         if( ePlayer.getText() == '' ):
             newClickable[0] = False
         else:
@@ -786,7 +852,6 @@ def operation(values, ngW):
                 '''
                 When there are  2  disks
                 '''
-                possible += 2
                 # if user wants to play
                 bPull1.deactivate("light grey")
                 sleep(.2)
@@ -804,17 +869,20 @@ def operation(values, ngW):
                     # sets scores before closing
                     bQuit.deactivate('light grey')
                     sleep(.5)
-                    setScores(ePlayer.getText(), tPoint.getText())
+                    setScores(ePlayer.getText(), int(tPoint.getText()), int(tRound.getText()))
                     w.close()
+                    break
 
                 if player == None:
                     # if current player does not exist
                     tRound.setText(str(match))
-                    current_score, disks = newGame( ngW, int(tPVal.getText()), int(tAVal.getText()), 
+                    current_score = newGame( ngW, int(tPVal.getText()), int(tAVal.getText()), 
                                              int(tGVal.getText()), int(tPoint.getText()), 
-                                             int(tRound.getText()), 2, possible, disks ) 
+                                             int(tRound.getText()), 2) 
+                    
                     tPoint.setText( current_score )
-                    setScores(ePlayer.getText(), int(tPoint.getText()), int(tRound.getText()), disks, possible)
+                    
+                    setScores(ePlayer.getText(), int(tPoint.getText()), int(tRound.getText()))
                     
                     undrawer(values)
                     highList = upDateHigh() 
@@ -823,12 +891,13 @@ def operation(values, ngW):
                 else:
                     # if player exists
                     tRound.setText(str(match))
-                    current_score, disks = newGame( ngW, int(tPVal.getText()), int(tAVal.getText()), 
+                    current_score = newGame( ngW, int(tPVal.getText()), int(tAVal.getText()), 
                                              int(tGVal.getText()), int(tPoint.getText()), 
-                                             int(tRound.getText()), 2, possible, player[2] ) 
+                                             int(tRound.getText()), 2) 
                     
-                    player = setScores(ePlayer.getText(), int(tPoint.getText()), int(tRound.getText()), disks, possible)
                     tPoint.setText( current_score )
+                    
+                    player = setScores(ePlayer.getText(), int(tPoint.getText()), int(tRound.getText()))
                     
                     undrawer(values)
                     highList = upDateHigh() 
@@ -842,7 +911,6 @@ def operation(values, ngW):
                 '''
                 When there are  1  disks
                 '''
-                possible += 1
                 # if user wants to play
                 bPull2.deactivate("light grey")
                 sleep(.2)
@@ -860,17 +928,19 @@ def operation(values, ngW):
                     # sets scores before closing
                     bQuit.deactivate('light grey')
                     sleep(.5)
-                    setScores(ePlayer.getText(), tPoint.getText())
+                    setScores(ePlayer.getText(), int(tPoint.getText()), int(tRound.getText()))
                     w.close()
+                    break
 
                 if player == None:
                     # if current player does not exist
                     tRound.setText(str(match))
-                    current_score, disks = newGame( ngW, int(tPVal.getText()), int(tAVal.getText()), 
+                    current_score = newGame( ngW, int(tPVal.getText()), int(tAVal.getText()), 
                                              int(tGVal.getText()), int(tPoint.getText()), 
-                                             int(tRound.getText()), 1, possible, disks ) 
+                                             int(tRound.getText()), 1) 
                     tPoint.setText( current_score )
-                    setScores(ePlayer.getText(), int(tPoint.getText()), int(tRound.getText()), disks, possible)
+                    
+                    setScores(ePlayer.getText(), int(tPoint.getText()), int(tRound.getText()))
                     
                     undrawer(values)
                     highList = upDateHigh() 
@@ -879,11 +949,12 @@ def operation(values, ngW):
                 else:
                     # if player exists
                     tRound.setText(str(match))
-                    current_score, disks = newGame( ngW, int(tPVal.getText()), int(tAVal.getText()), 
+                    current_score = newGame( ngW, int(tPVal.getText()), int(tAVal.getText()), 
                                              int(tGVal.getText()), int(tPoint.getText()), 
-                                             int(tRound.getText()), 1, possible, player[2] ) 
+                                             int(tRound.getText()), 1) 
                     tPoint.setText( current_score )
-                    player = setScores(ePlayer.getText(), int(tPoint.getText()), int(tRound.getText()), disks, possible)
+                    
+                    player = setScores(ePlayer.getText(), int(tPoint.getText()), int(tRound.getText()))
                    
                     undrawer(values)
                     highList = upDateHigh() 
@@ -903,10 +974,6 @@ def operation(values, ngW):
             
         # holds code for colour change of some buttons to appear
         sleep(.2)
-        
-        # set highscores
-        
-        
         
         # resets buttons to be correct state
         bAU.activate()
